@@ -24,8 +24,8 @@
   <h2>{beach.name} Surf Conditions</h2>
   {#if conditions}
     <ul>
-      <li>Wave Height: {conditions.waveHeight}</li>
-      <li>Wind: {conditions.windSpeed} {conditions.windDirection}</li>
+      <li>Wave Height: {conditions.wave_height}</li>
+      <li>Wind: {conditions.wind_speed} {conditions.wind_direction}</li>
       <li>Temperature: {conditions.temperature}</li>
       <li>Tide: {conditions.tide}</li>
     </ul>

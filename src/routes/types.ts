@@ -1,14 +1,14 @@
 export interface Beach {
   id: number;
   name: string;
-  camUrl: string;
-  youtubeVideoId: string;
+  cam_url: string;
+  youtube_video_id: string;
 }
 
 export interface Conditions {
-  waveHeight: string;
-  windSpeed: string;
-  windDirection: string;
+  wave_height: string;
+  wind_speed: string;
+  wind_direction: string;
   temperature: string;
   tide: string;
 }
@@ -17,8 +17,8 @@ export interface Post {
   id: number;
   author: string;
   content: string;
-  mediaUrl?: string;
-  captionsUrl?: string;
+  media_url?: string;
+  captions_url?: string;
   timestamp: string;
   likes: number;
   comments: number;

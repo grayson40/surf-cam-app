@@ -8,7 +8,7 @@
 
   onMount(() => {
     if (videoElement) {
-      videoElement.src = `https://www.youtube.com/embed/${beach.youtubeVideoId}?autoplay=1&mute=1&enablejsapi=1`;
+      videoElement.src = `https://www.youtube.com/embed/${beach.youtube_video_id}?autoplay=1&mute=1&enablejsapi=1`;
     }
   });
 </script>
@@ -19,7 +19,7 @@
     <iframe
       width="100%"
       height="100%"
-      src={`https://www.youtube.com/embed/${beach.youtubeVideoId}?autoplay=1&mute=1&enablejsapi=1`}
+      src={`https://www.youtube.com/embed/${beach.youtube_video_id}?autoplay=1&mute=1&enablejsapi=1`}
       title="{beach.name} live cam"
       frameborder="0"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

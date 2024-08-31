@@ -1,10 +1,10 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { sql } from '@vercel/postgres';
+import { db } from '$lib/db';
 
 export const GET: RequestHandler = async () => {
   try {
-    const { rows } = await sql`SELECT * FROM beaches`;
+    const { rows } = await db.sql`SELECT * FROM beaches`;
     return json(rows);
   } catch (error) {
     console.error('Error fetching beaches:', error);
@@ -15,7 +15,7 @@ export const GET: RequestHandler = async () => {
 export const POST: RequestHandler = async ({ request }) => {
   const beach = await request.json();
   try {
-    const { rows } = await sql`
+    const { rows } = await db.sql`
       INSERT INTO beaches (name, cam_url, youtube_video_id)
       VALUES (${beach.name}, ${beach.camUrl}, ${beach.youtubeVideoId})
       RETURNING *
