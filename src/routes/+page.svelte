@@ -1,40 +1,64 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
+  import type { Beach } from './types';
+  import BeachSelector from '../components/BeachSelector.svelte';
   import BeachCam from '../components/BeachCam.svelte';
   import SurfConditions from '../components/SurfConditions.svelte';
   import BoardRecommendation from '../components/BoardRecommendation.svelte';
-  import BeachSelector from '../components/BeachSelector.svelte';
   import SocialFeed from '../components/SocialFeed.svelte';
-  import type { Beach } from './types';
 
   let selectedBeach: Beach | null = null;
+  let conditions: any = null;
+  let isLoading = false;
 
-  /**
-   * Handle the beach selection event
-   * @param {CustomEvent<Beach>} event - Custom event containing the selected beach data
-   */
-  function handleBeachSelect(event: CustomEvent<Beach>) {
+  async function handleBeachSelect(event: CustomEvent<Beach>) {
     selectedBeach = event.detail;
+    await fetchConditions(selectedBeach);
+  }
+
+  async function fetchConditions(beach: Beach) {
+    if (!beach) return;
+    isLoading = true;
+    conditions = null;
+    try {
+      const response = await fetch(`http://127.0.0.1:5000/surf-conditions/${beach.location_id}`);
+      if (!response.ok) throw new Error('Failed to fetch conditions');
+      conditions = await response.json();
+    } catch (error) {
+      console.error('Error loading conditions:', error);
+    } finally {
+      isLoading = false;
+    }
   }
 </script>
 
 <main>
-  <h1>SurfSpot</h1>
-  
-  <BeachSelector on:select={handleBeachSelect} />
-  
+  <header>
+    <h1>Simply Surf</h1>
+    <BeachSelector on:select={handleBeachSelect} />
+  </header>
+
   {#if selectedBeach}
-    <div class="beach-info">
-      <div class="beach-cam-container">
-        <BeachCam beach={selectedBeach} />
+    <div class="content">
+      <div class="main-column">
+        <section class="video-section">
+          <BeachCam beach={selectedBeach} />
+        </section>
+        <section class="conditions-section">
+          <SurfConditions beach={selectedBeach} {conditions} {isLoading} />
+        </section>
       </div>
-      <div class="conditions-and-recommendation">
-        <SurfConditions beach={selectedBeach} />
-        <BoardRecommendation beach={selectedBeach} />
+      <div class="side-column">
+        <section class="board-recommendation-section">
+          <BoardRecommendation beach={selectedBeach} {conditions} {isLoading} />
+        </section>
+        <section class="social-feed-section">
+          <SocialFeed beach={selectedBeach} />
+        </section>
       </div>
     </div>
-    <SocialFeed beach={selectedBeach} />
   {:else}
-    <p>Select a beach to view surf conditions, recommendations, and social feed.</p>
+    <p class="select-prompt">Please select a beach to view its information.</p>
   {/if}
 </main>
 
@@ -42,51 +66,77 @@
   main {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 10px;
+    padding: 20px;
     font-family: Arial, sans-serif;
+    background-color: #f0f8ff;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 
   h1 {
     color: #0077be;
+    font-size: 2.5em;
+    margin: 0;
+  }
+
+  .content {
+    display: flex;
+    gap: 20px;
+  }
+
+  .main-column {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .side-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  section {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .select-prompt {
     text-align: center;
-    font-size: 1.8em;
+    font-size: 1.2em;
+    color: #555;
+    margin-top: 50px;
   }
 
-  .beach-info {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    margin-top: 20px;
-  }
-
-  .conditions-and-recommendation {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  @media (min-width: 768px) {
-    main {
-      padding: 20px;
+  @media (max-width: 1024px) {
+    header {
+      flex-direction: column;
+      align-items: stretch;
     }
 
     h1 {
-      font-size: 2.5em;
+      margin-bottom: 20px;
     }
 
-    .beach-info {
-      flex-direction: row;
-      align-items: flex-start;
+    .content {
+      flex-direction: column;
     }
 
-    .beach-cam-container {
-      flex: 2;
-      max-width: 66%;
-    }
-
-    .conditions-and-recommendation {
-      flex: 1;
-      max-width: 33%;
+    .main-column, .side-column {
+      width: 100%;
     }
   }
 </style>

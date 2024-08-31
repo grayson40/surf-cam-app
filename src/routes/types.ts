@@ -1,7 +1,7 @@
 export interface Beach {
   id: number;
   name: string;
-  cam_url: string;
+  location_id: string;
   youtube_video_id: string;
 }
 

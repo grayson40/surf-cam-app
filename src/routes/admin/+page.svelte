@@ -3,7 +3,7 @@
   import type { Beach } from '../types';
 
   let beaches: Beach[] = [];
-  let newBeach: Partial<Beach> = { name: '', cam_url: '', youtube_video_id: '' };
+  let newBeach: Partial<Beach> = { name: '', location_id: '', youtube_video_id: '' };
 
   onMount(async () => {
     await fetchBeaches();
@@ -22,7 +22,7 @@
     });
     if (response.ok) {
       await fetchBeaches();
-      newBeach = { name: '', cam_url: '', youtube_video_id: '' };
+      newBeach = { name: '', location_id: '', youtube_video_id: '' };
     }
   }
 
@@ -41,7 +41,7 @@
     <h2>Add New Beach</h2>
     <form on:submit|preventDefault={addBeach}>
       <input bind:value={newBeach.name} placeholder="Beach Name" required>
-      <input bind:value={newBeach.cam_url} placeholder="Cam URL" required>
+      <input bind:value={newBeach.location_id} placeholder="Surfline Location ID" required>
       <input bind:value={newBeach.youtube_video_id} placeholder="YouTube Video ID" required>
       <button type="submit">Add Beach</button>
     </form>
