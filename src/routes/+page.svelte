@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import type { Beach } from './types';
+  import type { Beach, Conditions } from './types';
   import BeachSelector from '../components/BeachSelector.svelte';
   import BeachCam from '../components/BeachCam.svelte';
   import SurfConditions from '../components/SurfConditions.svelte';
@@ -21,18 +21,11 @@
     isLoading = true;
     conditions = null;
     try {
-      const baseUrl = 'https://services.surfline.com/kbyg/spots/forecasts';
-      const spotId = beach.location_id;
-      const days = 1;
-
-      const [wave, wind, tides, weather] = await Promise.all([
-        fetch(`${baseUrl}/wave?spotId=${spotId}&days=${days}`).then(res => res.json()),
-        fetch(`${baseUrl}/wind?spotId=${spotId}&days=${days}`).then(res => res.json()),
-        fetch(`${baseUrl}/tides?spotId=${spotId}&days=${days}`).then(res => res.json()),
-        fetch(`${baseUrl}/weather?spotId=${spotId}&days=${days}`).then(res => res.json())
-      ]);
-
-      conditions = { wave, wind, tides, weather };
+      const response = await fetch(`/api/conditions?beachId=${beach.id}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch conditions');
+      }
+      conditions = await response.json();
       console.log('Conditions after fetch:', conditions);
     } catch (error) {
       console.error('Error loading conditions:', error);

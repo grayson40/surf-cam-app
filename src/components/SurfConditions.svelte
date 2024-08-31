@@ -1,14 +1,9 @@
 <script lang="ts">
-  import type { Beach } from '../routes/types';
+  import type { Beach, Conditions } from '../routes/types';
 
   export let beach: Beach;
-  export let conditions: any;
+  export let conditions: Conditions | null;
   export let isLoading: boolean;
-
-  $: waveData = conditions?.wave?.data?.wave?.[0] || {};
-  $: windData = conditions?.wind?.data?.wind?.[0] || {};
-  $: weatherData = conditions?.weather?.data?.weather?.[0] || {};
-  $: tidesData = conditions?.tides?.data?.tides?.[0] || {};
 </script>
 
 <h2>{beach.name} Surf Conditions</h2>
@@ -22,30 +17,30 @@
     <div class="condition-card">
       <span class="icon">🌊</span>
       <h3>Waves</h3>
-      <p>{waveData.surf?.min} - {waveData.surf?.max} ft</p>
-      <p class="description">{waveData.surf?.humanRelation}</p>
+      <p>{conditions.wave.height} ft</p>
+      <p>Period: {conditions.wave.period} seconds</p>
+      <p>Direction: {conditions.wave.direction}</p>
     </div>
     <div class="condition-card">
       <span class="icon">💨</span>
       <h3>Wind</h3>
-      <p>{windData.speed} mph</p>
-      <p>Gust: {windData.gust} mph</p>
-      <p>{windData.directionType} ({windData.direction}°)</p>
+      <p>{conditions.wind.speed} mph</p>
+      <p>Direction: {conditions.wind.direction}</p>
     </div>
     <div class="condition-card">
       <span class="icon">🌡️</span>
       <h3>Weather</h3>
-      <p>{weatherData.temperature}°F</p>
-      <p>{weatherData.condition}</p>
+      <p>{conditions.weather.temperature}°F</p>
+      <p>{conditions.weather.condition}</p>
     </div>
     <div class="condition-card">
       <span class="icon">🌊</span>
       <h3>Tides</h3>
-      <p>Type: {tidesData.type}</p>
-      <p>Height: {tidesData.height} ft</p>
+      <p>High: {conditions.tide.high_tide} ft</p>
+      <p>Low: {conditions.tide.low_tide} ft</p>
     </div>
   </div>
-  <p class="timestamp">Last updated: {new Date().toLocaleString()}</p>
+  <p class="timestamp">Last updated: {new Date(conditions.timestamp).toLocaleString()}</p>
 {:else}
   <p>No conditions data available. Please try refreshing the page.</p>
 {/if}

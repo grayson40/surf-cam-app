@@ -1,25 +1,66 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/db';
+import type { Conditions } from '../../../routes/types';
 
 export const GET: RequestHandler = async ({ url }) => {
   const beachId = url.searchParams.get('beachId');
-  
+
   if (!beachId) {
     return json({ error: 'Beach ID is required' }, { status: 400 });
   }
 
   try {
-    const { rows } = await db.sql`
-      SELECT * FROM conditions 
-      WHERE beach_id = ${beachId} 
-      ORDER BY timestamp DESC 
-      LIMIT 1
-    `;
-    return json(rows[0] || null);
+    const client = await db.connect();
+    try {
+      const result = await client.query(`
+        SELECT c.timestamp, w.height, w.period, w.direction as wave_direction,
+               wind.speed as wind_speed, wind.direction as wind_direction,
+               t.high_tide, t.low_tide,
+               wt.temperature, wt.condition as weather_condition
+        FROM conditions c
+        JOIN wave_conditions w ON c.wave_id = w.id
+        JOIN wind_conditions wind ON c.wind_id = wind.id
+        JOIN tide_conditions t ON c.tide_id = t.id
+        JOIN weather_conditions wt ON c.weather_id = wt.id
+        WHERE c.beach_id = $1
+        ORDER BY c.timestamp DESC
+        LIMIT 1
+      `, [beachId]);
+
+      if (result.rows.length === 0) {
+        return json({ error: 'No conditions found for this beach' }, { status: 404 });
+      }
+
+      const row = result.rows[0];
+      const conditions: Conditions = {
+        timestamp: row.timestamp,
+        wave: {
+          height: row.height,
+          period: row.period,
+          direction: row.wave_direction
+        },
+        wind: {
+          speed: row.wind_speed,
+          direction: row.wind_direction
+        },
+        tide: {
+          high_tide: row.high_tide,
+          low_tide: row.low_tide
+        },
+        weather: {
+          temperature: row.temperature,
+          condition: row.weather_condition
+        }
+      };
+
+      return json(conditions);
+    } finally {
+      client.release();
+    }
   } catch (error) {
-    console.error('Error fetching conditions:', error);
-    return json({ error: 'Failed to fetch conditions' }, { status: 500 });
+    console.error('Database error:', error);
+    return json({ error: 'Internal server error' }, { status: 500 });
   }
 };
 

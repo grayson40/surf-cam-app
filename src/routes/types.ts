@@ -6,11 +6,11 @@ export interface Beach {
 }
 
 export interface Conditions {
-  wave_height: string;
-  wind_speed: string;
-  wind_direction: string;
-  temperature: string;
-  tide: string;
+  wave: WaveCondition;
+  wind: WindCondition;
+  tide: TideCondition;
+  weather: WeatherCondition;
+  timestamp: string;
 }
 
 export interface Post {
@@ -22,4 +22,25 @@ export interface Post {
   timestamp: string;
   likes: number;
   comments: number;
+}
+
+export interface WaveCondition {
+  height: number;
+  period: number;
+  direction: string;
+}
+
+export interface WindCondition {
+  speed: number;
+  direction: string;
+}
+
+export interface TideCondition {
+  high_tide: number;
+  low_tide: number;
+}
+
+export interface WeatherCondition {
+  temperature: number;
+  condition: string;
 }

@@ -1,37 +1,25 @@
 <script lang="ts">
-  import type { Beach } from '../routes/types';
+  import type { Beach, Conditions } from '../routes/types';
 
   export let beach: Beach;
-  export let conditions: any;
+  export let conditions: Conditions | null;
   export let isLoading: boolean;
 
-  let recommendedBoard: string = '';
+  $: recommendedBoard = determineRecommendedBoard(conditions);
 
-  $: if (conditions) {
-    determineRecommendedBoard();
-  }
+  function determineRecommendedBoard(conditions: Conditions | null): string {
+    if (!conditions) return "Unable to determine recommendation.";
 
-  function determineRecommendedBoard() {
-    if (!conditions?.wave?.data?.wave?.[0]) return;
+    const { wave, wind } = conditions;
 
-    const waveData = conditions.wave.data.wave[0];
-    const windData = conditions.wind.data.wind[0];
-
-    const maxWaveHeight = waveData.surf.max;
-    const windSpeed = windData.speed;
-
-    if (maxWaveHeight < 3) {
-      recommendedBoard = "Longboard (9'0\")";
-    } else if (maxWaveHeight >= 3 && maxWaveHeight < 5) {
-      recommendedBoard = "Funboard (7'6\")";
-    } else if (maxWaveHeight >= 5 && maxWaveHeight < 8) {
-      recommendedBoard = "Shortboard (6'2\")";
+    if (wave.height < 3) {
+      return "Longboard (9'0\")";
+    } else if (wave.height >= 3 && wave.height < 5) {
+      return "Funboard (7'6\")";
+    } else if (wave.height >= 5 && wave.height < 8) {
+      return "Shortboard (6'2\")";
     } else {
-      recommendedBoard = "Gun (7'6\" or longer)";
-    }
-
-    if (windSpeed > 15) {
-      recommendedBoard += " with a bit more volume for choppy conditions";
+      return "Gun (7'6\" or longer)";
     }
   }
 </script>
@@ -42,10 +30,10 @@
     <div class="spinner"></div>
     <p>Analyzing conditions...</p>
   </div>
-{:else if recommendedBoard && conditions?.wave?.data?.wave?.[0]}
+{:else if conditions}
   <div class="recommendation">
     <p class="board">{recommendedBoard}</p>
-    <p class="description">Based on current conditions with max wave height of {conditions.wave.data.wave[0].surf.max} ft, we recommend a {recommendedBoard.toLowerCase()} for optimal performance.</p>
+    <p class="description">Based on current conditions with wave height of {conditions.wave.height} ft, we recommend a {recommendedBoard.toLowerCase()} for optimal performance.</p>
   </div>
 {:else}
   <p class="error">Unable to determine recommendation. Please try again later.</p>
