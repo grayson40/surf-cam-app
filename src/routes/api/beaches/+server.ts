@@ -16,8 +16,8 @@ export const POST: RequestHandler = async ({ request }) => {
   const beach = await request.json();
   try {
     const { rows } = await db.sql`
-      INSERT INTO beaches (name, cam_url, youtube_video_id)
-      VALUES (${beach.name}, ${beach.camUrl}, ${beach.youtubeVideoId})
+      INSERT INTO beaches (name, location_id, youtube_video_id)
+      VALUES (${beach.name}, ${beach.location_id}, ${beach.youtube_video_id})
       RETURNING *
     `;
     return json(rows[0], { status: 201 });
