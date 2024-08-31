@@ -27,42 +27,61 @@ async function fetchAndStoreConditions(beach) {
       urls.map(url => fetch(url).then(res => res.json()))
     );
 
+    console.log('Fetched conditions:', wave, wind, tides, weather);
+
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
 
-      // Insert wave conditions
-      const waveResult = await client.query(
-        'INSERT INTO wave_conditions (height, period, direction) VALUES ($1, $2, $3) RETURNING id',
-        [wave.data.wave[0].surf.min, wave.data.wave[0].period, wave.data.wave[0].direction]
-      );
+      // Insert or update wave conditions
+      const waveResult = await client.query(`
+        INSERT INTO wave_conditions (height_min, height_max, height_human_relation, height_avg, period, direction)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING id
+      `, [
+        wave.data.wave[0].surf.min,
+        wave.data.wave[0].surf.max,
+        wave.data.wave[0].surf.humanRelation,
+        (wave.data.wave[0].surf.min + wave.data.wave[0].surf.max) / 2, // Calculate average
+        wave.data.wave[0].period,
+        wave.data.wave[0].direction
+      ]);
 
-      // Insert wind conditions
-      const windResult = await client.query(
-        'INSERT INTO wind_conditions (speed, direction) VALUES ($1, $2) RETURNING id',
-        [wind.data.wind[0].speed, wind.data.wind[0].direction]
-      );
+      // Insert or update wind conditions
+      const windResult = await client.query(`
+        INSERT INTO wind_conditions (speed, direction)
+        VALUES ($1, $2)
+        RETURNING id
+      `, [wind.data.wind[0].speed, wind.data.wind[0].direction]);
 
-      // Insert tide conditions
-      const tideResult = await client.query(
-        'INSERT INTO tide_conditions (high_tide, low_tide) VALUES ($1, $2) RETURNING id',
-        [tides.data.tides[0].height, tides.data.tides[1].height]
-      );
+      // Insert or update tide conditions
+      const tideResult = await client.query(`
+        INSERT INTO tide_conditions (high_tide, low_tide)
+        VALUES ($1, $2)
+        RETURNING id
+      `, [tides.data.tides[0].height, tides.data.tides[1].height]);
 
-      // Insert weather conditions
-      const weatherResult = await client.query(
-        'INSERT INTO weather_conditions (temperature, condition) VALUES ($1, $2) RETURNING id',
-        [weather.data.weather[0].temperature, weather.data.weather[0].condition]
-      );
+      // Insert or update weather conditions
+      const weatherResult = await client.query(`
+        INSERT INTO weather_conditions (temperature, condition)
+        VALUES ($1, $2)
+        RETURNING id
+      `, [weather.data.weather[0].temperature, weather.data.weather[0].condition]);
 
-      // Insert main conditions record
-      await client.query(
-        'INSERT INTO conditions (beach_id, wave_id, wind_id, tide_id, weather_id) VALUES ($1, $2, $3, $4, $5)',
-        [beach.id, waveResult.rows[0].id, windResult.rows[0].id, tideResult.rows[0].id, weatherResult.rows[0].id]
-      );
+      // Insert or update the conditions record
+      await client.query(`
+        INSERT INTO conditions (beach_id, wave_id, wind_id, tide_id, weather_id, timestamp)
+        VALUES ($1, $2, $3, $4, $5, NOW())
+        ON CONFLICT (beach_id) DO UPDATE SET
+          wave_id = EXCLUDED.wave_id,
+          wind_id = EXCLUDED.wind_id,
+          tide_id = EXCLUDED.tide_id,
+          weather_id = EXCLUDED.weather_id,
+          timestamp = NOW()
+      `, [beach.id, waveResult.rows[0].id, windResult.rows[0].id, tideResult.rows[0].id, weatherResult.rows[0].id]);
 
       await client.query('COMMIT');
-      console.log('Conditions stored successfully');
+      console.log('Conditions updated successfully');
     } catch (error) {
       await client.query('ROLLBACK');
       throw error;

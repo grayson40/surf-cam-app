@@ -17,7 +17,7 @@
     <div class="condition-card">
       <span class="icon">🌊</span>
       <h3>Waves</h3>
-      <p>{conditions.wave.height} ft</p>
+      <p>{conditions.wave.height.min} - {conditions.wave.height.max} ft ({conditions.wave.height.humanRelation})</p>
       <p>Period: {conditions.wave.period} seconds</p>
       <p>Direction: {conditions.wave.direction}</p>
     </div>

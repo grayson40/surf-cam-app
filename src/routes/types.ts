@@ -25,7 +25,12 @@ export interface Post {
 }
 
 export interface WaveCondition {
-  height: number;
+  height: {
+    min: number;
+    max: number;
+    avg: number;
+    humanRelation: string;
+  };
   period: number;
   direction: string;
 }

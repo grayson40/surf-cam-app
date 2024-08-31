@@ -10,13 +10,14 @@
   function determineRecommendedBoard(conditions: Conditions | null): string {
     if (!conditions) return "Unable to determine recommendation.";
 
-    const { wave, wind } = conditions;
+    const { wave } = conditions;
+    const avgHeight = wave.height.avg;
 
-    if (wave.height < 3) {
+    if (avgHeight < 3) {
       return "Longboard (9'0\")";
-    } else if (wave.height >= 3 && wave.height < 5) {
+    } else if (avgHeight >= 3 && avgHeight < 5) {
       return "Funboard (7'6\")";
-    } else if (wave.height >= 5 && wave.height < 8) {
+    } else if (avgHeight >= 5 && avgHeight < 8) {
       return "Shortboard (6'2\")";
     } else {
       return "Gun (7'6\" or longer)";
@@ -33,7 +34,10 @@
 {:else if conditions}
   <div class="recommendation">
     <p class="board">{recommendedBoard}</p>
-    <p class="description">Based on current conditions with wave height of {conditions.wave.height} ft, we recommend a {recommendedBoard.toLowerCase()} for optimal performance.</p>
+    <p class="description">
+      Based on current conditions with wave height of {conditions.wave.height.min} - {conditions.wave.height.max} ft 
+      ({conditions.wave.height.humanRelation}), we recommend a {recommendedBoard.toLowerCase()} for optimal performance.
+    </p>
   </div>
 {:else}
   <p class="error">Unable to determine recommendation. Please try again later.</p>

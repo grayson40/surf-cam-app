@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/db';
-import type { Conditions } from '../../../routes/types';
+import type { Conditions } from '../../types';
 
 export const GET: RequestHandler = async ({ url }) => {
   const beachId = url.searchParams.get('beachId');
@@ -14,10 +14,12 @@ export const GET: RequestHandler = async ({ url }) => {
     const client = await db.connect();
     try {
       const result = await client.query(`
-        SELECT c.timestamp, w.height, w.period, w.direction as wave_direction,
-               wind.speed as wind_speed, wind.direction as wind_direction,
-               t.high_tide, t.low_tide,
-               wt.temperature, wt.condition as weather_condition
+        SELECT 
+          c.timestamp,
+          w.height_min, w.height_max, w.height_avg, w.height_human_relation, w.period, w.direction as wave_direction,
+          wind.speed as wind_speed, wind.direction as wind_direction,
+          t.high_tide, t.low_tide,
+          wt.temperature, wt.condition as weather_condition
         FROM conditions c
         JOIN wave_conditions w ON c.wave_id = w.id
         JOIN wind_conditions wind ON c.wind_id = wind.id
@@ -36,7 +38,12 @@ export const GET: RequestHandler = async ({ url }) => {
       const conditions: Conditions = {
         timestamp: row.timestamp,
         wave: {
-          height: row.height,
+          height: {
+            min: row.height_min,
+            max: row.height_max,
+            avg: row.height_avg,
+            humanRelation: row.height_human_relation
+          },
           period: row.period,
           direction: row.wave_direction
         },
