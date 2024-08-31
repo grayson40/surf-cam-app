@@ -5,7 +5,10 @@
   export let conditions: any;
   export let isLoading: boolean;
 
-  console.log('conditions', conditions);
+  $: waveData = conditions?.wave?.data?.wave?.[0] || {};
+  $: windData = conditions?.wind?.data?.wind?.[0] || {};
+  $: weatherData = conditions?.weather?.data?.weather?.[0] || {};
+  $: tidesData = conditions?.tides?.data?.tides?.[0] || {};
 </script>
 
 <h2>{beach.name} Surf Conditions</h2>
@@ -19,37 +22,32 @@
     <div class="condition-card">
       <span class="icon">🌊</span>
       <h3>Waves</h3>
-      <p>{conditions.surf_min[0]} - {conditions.surf_max[0]} ft</p>
-      <p class="description">{conditions.surf_humanRelation[0]}</p>
+      <p>{waveData.surf?.min} - {waveData.surf?.max} ft</p>
+      <p class="description">{waveData.surf?.humanRelation}</p>
     </div>
     <div class="condition-card">
       <span class="icon">💨</span>
       <h3>Wind</h3>
-      <p>{conditions.speed[0]} mph</p>
-      <p>Gust: {conditions.gust[0]} mph</p>
-      <p>{conditions.directionType[0]} ({conditions.direction[0]}°)</p>
+      <p>{windData.speed} mph</p>
+      <p>Gust: {windData.gust} mph</p>
+      <p>{windData.directionType} ({windData.direction}°)</p>
     </div>
     <div class="condition-card">
       <span class="icon">🌡️</span>
       <h3>Weather</h3>
-      <p>{conditions.temperature[0]}°F</p>
-      <p>{conditions.pressure[0]} hPa</p>
-      <p>Condition: {conditions.condition[0]}</p>
+      <p>{weatherData.temperature}°F</p>
+      <p>{weatherData.condition}</p>
     </div>
     <div class="condition-card">
       <span class="icon">🌊</span>
-      <h3>Swell</h3>
-      <p>{conditions.swells_0_height[0]} ft</p>
-      <p>{conditions.swells_0_period[0]} seconds</p>
-      <p>{conditions.swells_0_direction[0]}°</p>
+      <h3>Tides</h3>
+      <p>Type: {tidesData.type}</p>
+      <p>Height: {tidesData.height} ft</p>
     </div>
   </div>
-  <p class="timestamp">Last updated: {new Date(conditions.timestamp_dt[0]).toLocaleString()}</p>
+  <p class="timestamp">Last updated: {new Date().toLocaleString()}</p>
 {:else}
-  <div class="loading">
-    <div class="spinner"></div>
-    <p>Loading conditions...</p>
-  </div>
+  <p>No conditions data available. Please try refreshing the page.</p>
 {/if}
 
 <style>
@@ -62,8 +60,8 @@
   }
 
   .conditions-grid {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
   }
 

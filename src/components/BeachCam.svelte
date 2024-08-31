@@ -1,32 +1,27 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import type { Beach } from '../routes/types';
 
-  export let beach: Beach;
-
-  let videoElement: HTMLVideoElement;
-
-  onMount(() => {
-    if (videoElement) {
-      videoElement.src = `https://www.youtube.com/embed/${beach.youtube_video_id}?autoplay=1&mute=1&enablejsapi=1`;
-    }
-  });
+  export let beach: Beach | null;
 </script>
 
-<div class="beach-cam">
-  <h2>{beach.name} Live Cam</h2>
-  <div class="cam-container">
-    <iframe
-      width="100%"
-      height="100%"
-      src={`https://www.youtube.com/embed/${beach.youtube_video_id}?autoplay=1&mute=1&enablejsapi=1`}
-      title="{beach.name} live cam"
-      frameborder="0"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      allowfullscreen
-    ></iframe>
+{#if beach}
+  <div class="beach-cam">
+    <h2>{beach.name} Live Cam</h2>
+    <div class="cam-container">
+      <iframe
+        width="100%"
+        height="100%"
+        src={`https://www.youtube.com/embed/${beach.youtube_video_id}?autoplay=1&mute=1&enablejsapi=1`}
+        title="{beach.name} live cam"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen
+      ></iframe>
+    </div>
   </div>
-</div>
+{:else}
+  <p>Select a beach to view the cam</p>
+{/if}
 
 <style>
   .beach-cam {

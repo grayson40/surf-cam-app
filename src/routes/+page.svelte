@@ -21,9 +21,19 @@
     isLoading = true;
     conditions = null;
     try {
-      const response = await fetch(`http://127.0.0.1:5000/surf-conditions/${beach.location_id}`);
-      if (!response.ok) throw new Error('Failed to fetch conditions');
-      conditions = await response.json();
+      const baseUrl = 'https://services.surfline.com/kbyg/spots/forecasts';
+      const spotId = beach.location_id;
+      const days = 1;
+
+      const [wave, wind, tides, weather] = await Promise.all([
+        fetch(`${baseUrl}/wave?spotId=${spotId}&days=${days}`).then(res => res.json()),
+        fetch(`${baseUrl}/wind?spotId=${spotId}&days=${days}`).then(res => res.json()),
+        fetch(`${baseUrl}/tides?spotId=${spotId}&days=${days}`).then(res => res.json()),
+        fetch(`${baseUrl}/weather?spotId=${spotId}&days=${days}`).then(res => res.json())
+      ]);
+
+      conditions = { wave, wind, tides, weather };
+      console.log('Conditions after fetch:', conditions);
     } catch (error) {
       console.error('Error loading conditions:', error);
     } finally {
@@ -115,6 +125,13 @@
   }
 
   .select-prompt {
+    text-align: center;
+    font-size: 1.2em;
+    color: #555;
+    margin-top: 50px;
+  }
+
+  .loading {
     text-align: center;
     font-size: 1.2em;
     color: #555;

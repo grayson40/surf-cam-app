@@ -12,10 +12,13 @@
   }
 
   function determineRecommendedBoard() {
-    if (!conditions) return;
+    if (!conditions?.wave?.data?.wave?.[0]) return;
 
-    const maxWaveHeight = conditions.surf_max[0];
-    const windSpeed = conditions.speed[0];
+    const waveData = conditions.wave.data.wave[0];
+    const windData = conditions.wind.data.wind[0];
+
+    const maxWaveHeight = waveData.surf.max;
+    const windSpeed = windData.speed;
 
     if (maxWaveHeight < 3) {
       recommendedBoard = "Longboard (9'0\")";
@@ -39,10 +42,10 @@
     <div class="spinner"></div>
     <p>Analyzing conditions...</p>
   </div>
-{:else if recommendedBoard}
+{:else if recommendedBoard && conditions?.wave?.data?.wave?.[0]}
   <div class="recommendation">
     <p class="board">{recommendedBoard}</p>
-    <p class="description">Based on current conditions with max wave height of {conditions.surf_max[0]} ft, we recommend a {recommendedBoard.toLowerCase()} for optimal performance.</p>
+    <p class="description">Based on current conditions with max wave height of {conditions.wave.data.wave[0].surf.max} ft, we recommend a {recommendedBoard.toLowerCase()} for optimal performance.</p>
   </div>
 {:else}
   <p class="error">Unable to determine recommendation. Please try again later.</p>
