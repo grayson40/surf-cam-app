@@ -29,3 +29,22 @@ export const DELETE: RequestHandler = async ({ params }) => {
     return json({ error: 'Failed to delete beach' }, { status: 500 });
   }
 };
+
+export const PUT: RequestHandler = async ({ params, request }) => {
+  const { id } = params;
+  const updatedBeach = await request.json();
+  try {
+    const { rowCount } = await db.sql`
+      UPDATE beaches
+      SET name = ${updatedBeach.name}, location_id = ${updatedBeach.location_id}, youtube_video_id = ${updatedBeach.youtube_video_id}
+      WHERE id = ${id}
+    `;
+    if (rowCount === 0) {
+      return json({ error: 'Beach not found' }, { status: 404 });
+    }
+    return json({ message: 'Beach updated successfully' });
+  } catch (error) {
+    console.error('Error updating beach:', error);
+    return json({ error: 'Failed to update beach' }, { status: 500 });
+  }
+};

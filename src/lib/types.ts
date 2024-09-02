@@ -1,7 +1,8 @@
 export interface Beach {
   id: number;
   name: string;
-  // Add other beach properties as needed
+  location_id: string;
+  youtube_video_id: string;
 }
 
 export interface Post {

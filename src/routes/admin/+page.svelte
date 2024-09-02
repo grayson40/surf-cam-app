@@ -1,9 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import EditBeachModal from '../../components/EditBeachModal.svelte';
   import type { Beach } from '../types';
 
   let beaches: Beach[] = [];
   let newBeach: Partial<Beach> = { name: '', location_id: '', youtube_video_id: '' };
+  let selectedBeach: Partial<Beach> = {};
+  let showModal = false;
 
   onMount(async () => {
     await fetchBeaches();
@@ -32,6 +35,20 @@
       await fetchBeaches();
     }
   }
+
+  function openEditModal(beach: Beach) {
+    selectedBeach = { ...beach };
+    showModal = true;
+  }
+
+  function closeEditModal() {
+    showModal = false;
+  }
+
+  async function saveChanges() {
+    await fetchBeaches();
+    closeEditModal();
+  }
 </script>
 
 <main>
@@ -53,11 +70,18 @@
       {#each beaches as beach (beach.id)}
         <li>
           <span>{beach.name}</span>
-          <button on:click={() => deleteBeach(beach.id)}>Delete</button>
+          <div class="buttons">
+            <button class="edit" on:click={() => openEditModal(beach)}>Edit</button>
+            <button class="delete" on:click={() => deleteBeach(beach.id)}>Delete</button>
+          </div>
         </li>
       {/each}
     </ul>
   </section>
+
+  {#if showModal}
+    <EditBeachModal beach={selectedBeach} on:close={closeEditModal} on:save={saveChanges} />
+  {/if}
 </main>
 
 <style>
@@ -136,13 +160,24 @@
     font-size: 1.1em;
   }
 
-  li button {
-    background-color: #ff4136;
-    padding: 5px 10px;
-    font-size: 0.9em;
+  .buttons {
+    display: flex;
+    gap: 10px;
   }
 
-  li button:hover {
+  .edit {
+    background-color: #0077be;
+  }
+
+  .delete {
+    background-color: #ff4136;
+  }
+
+  .edit:hover {
+    background-color: #005c8f;
+  }
+
+  .delete:hover {
     background-color: #d30000;
   }
 
@@ -165,7 +200,7 @@
       gap: 10px;
     }
 
-    li button {
+    .buttons {
       align-self: flex-end;
     }
   }
